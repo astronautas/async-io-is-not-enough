@@ -55,14 +55,20 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	startTime := time.Now()
+	for _, num_experiments := range [6]int{1, 2, 4, 8, 16, 32} {
+		fmt.Printf("Tasks: %d \n", num_experiments)
 
-	for i := 0; i <= 24; i++ {
-		wg.Add(1)
-		go work(&wg)
+		startTime := time.Now()
+
+		for i := 0; i <= num_experiments; i++ {
+			wg.Add(1)
+
+			// run as go routine to speed-up IO
+			go work(&wg)
+		}
+
+		wg.Wait()
+
+		fmt.Println("Elapsed time:", time.Since(startTime))
 	}
-
-	wg.Wait()
-
-	fmt.Println("Elapsed time:", time.Since(startTime))
 }

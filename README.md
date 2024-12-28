@@ -13,7 +13,7 @@ cd go
 GOMAXPROCS=1 go run benchmark.go --serial --io
 ```
 
-2. Python GIL threaded vs Go goroutines, IO dominated:
+1. Python GIL threaded vs Go goroutines, IO dominated:
 ```bash
 cd python
 PYTHON_GIL=1 uv run benchmark.py
@@ -23,24 +23,26 @@ go run benchmark.go
 ```
 
 
-2. Execute Python NO GIL benchmark:
-```bash
-cd python
-PYTHON_GIL=0 uv run benchmark.py
-```
-3. Execute Go benchmark:
-```bash
-cd go
-go run benchmark.go
-```
+
 
 Comparisons:
 * Python serial vs Go serial, IO dominated. Go is bit faster because of compiled nature, but scales similarly.
-* Python GIL threaded vs Go goroutines, IO dominated. Go is bit faster because of compiled nature, but scales similarly.
-* Python GIL threaded vs Go goroutines, CPU heavy (Python is slower because of GIL).
+* Python GIL threaded vs Go goroutines, IO dominated. Show async-io way of doing. Go is bit faster because of compiled nature, but scales similarly.
+* Python GIL threaded vs Go goroutines, CPU heavy (Python is slower because of GIL). Also show async-io does not solve the problem.
 * Python GIL multiprocess vs Go goroutines, CPU heavy (Python is slower because of GIL, but kind of near Go because of multiprocess).
 * Python NO GIL threaded vs Go goroutines, CPU heavy (Python is faster because of no GIL).
+* Python NO GIL async-io discussion (show links to potential discussions).
 
 idea - show that Go is just easier to parallelize than Python, Python needs tricks, asyncio is not a silver bullet (because of GIL), multiprocessing is not as easy to use as goroutines. But Python 3.13 is coming with no GIL, so promising!
 
 next - compare overhead of goroutines vs asyncio, multiprocessing.
+
+TODO:
+- [x] Benchmark serial vs goroutines, IO dominated
+- [x] Benchmark adding goroutines to Go, IO dominated
+- [x] Benchmark GIL threaded vs. asyncio vs goroutines, IO dominated
+- [ ] Benchmark GIL threaded vs asyncio vs. goroutines, CPU heavy
+- [ ] Benchmark GIL multiprocess vs goroutines, CPU heavy
+- [ ] Benchmark NO GIL threaded vs goroutines, CPU heavy
+- [ ] Section on async-io
+- [ ] Blog post
