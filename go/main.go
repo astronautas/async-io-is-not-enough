@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"math"
+	"math/rand/v2"
 	"net/http"
 	"runtime"
 	"sync"
@@ -36,13 +39,17 @@ func fakeIoOp(seconds int) {
 	defer resp.Body.Close()
 
 	io.ReadAll(resp.Body)
+
+	// into json
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
 }
 
 func work(wg *sync.WaitGroup) {
 	defer wg.Done()
 	// ~1s
-	// fakeCPUOperation(1_500_000_000, rand.Float64())
 	fakeIoOp(1)
+	fakeCPUOperation(4_000_000_000, rand.Float64())
 }
 
 func getGOMAXPROCS() int {
@@ -53,22 +60,42 @@ func getGOMAXPROCS() int {
 func main() {
 	fmt.Printf("GOMAXPROCS is %d\n", getGOMAXPROCS())
 
-	var wg sync.WaitGroup
+	serial := flag.Bool("serial", false, "Run experiments serially (without parallelization).")
+	flag.Parse()
 
-	for _, num_experiments := range [6]int{1, 2, 4, 8, 16, 32} {
-		fmt.Printf("Tasks: %d \n", num_experiments)
+	if *serial {
+		fmt.Println("Running serially")
 
-		startTime := time.Now()
+		for _, num_experiments := range [6]int{1, 2, 4, 8, 16, 32} {
+			fmt.Printf("Tasks: %d \n", num_experiments)
 
-		for i := 0; i <= num_experiments; i++ {
-			wg.Add(1)
+			startTime := time.Now()
 
-			// run as go routine to speed-up IO
-			go work(&wg)
+			for i := 0; i <= num_experiments; i++ {
+				fakeIoOp(1)
+				fakeCPUOperation(4_500_000_000, rand.Float64())
+			}
+
+			fmt.Println("Elapsed time:", time.Since(startTime))
 		}
+	} else {
+		fmt.Println("Running in parallel")
 
-		wg.Wait()
+		var wg sync.WaitGroup
 
-		fmt.Println("Elapsed time:", time.Since(startTime))
+		for _, num_experiments := range [6]int{1, 2, 4, 8, 16, 32} {
+			fmt.Printf("Tasks: %d \n", num_experiments)
+
+			startTime := time.Now()
+
+			for i := 0; i <= num_experiments; i++ {
+				wg.Add(1)
+				go work(&wg)
+			}
+
+			wg.Wait()
+
+			fmt.Println("Elapsed time:", time.Since(startTime))
+		}
 	}
 }

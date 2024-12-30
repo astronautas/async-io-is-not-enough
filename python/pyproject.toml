@@ -3,10 +3,11 @@ name = "python"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 dependencies = [
     "click>=8.1.8",
     "numpy>=2.2.1",
+    "pandas>=2.2.3",
     "requests>=2.32.3",
     "seaborn>=0.13.2",
 ]
@@ -14,4 +15,10 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff>=0.8.4",
+]
+
+gil = [
+    "scipy>=1.14.1",
+    "aiohttp>=3.11.11",
+    "aiomultiprocess>=0.9.1",
 ]
